@@ -16,7 +16,7 @@ namespace SparkCore;
 public class Compilation
 {
     private BoundGlobalScope _globalScope;
-    private Compilation(bool isScript, Compilation previous, params SyntaxTree[] syntaxTrees)
+    private Compilation(bool isScript, Compilation? previous, params SyntaxTree[] syntaxTrees)
     {
         IsScript = isScript;
         Previous = previous;
@@ -27,7 +27,7 @@ public class Compilation
     {
         return new Compilation(isScript: false, null, syntaxTrees);
     }
-    public static Compilation CreateScript(Compilation previous, params SyntaxTree[] syntaxTrees)
+    public static Compilation CreateScript(Compilation? previous, params SyntaxTree[] syntaxTrees)
     {
         return new Compilation(isScript: true, previous, syntaxTrees);
     }
@@ -36,7 +36,7 @@ public class Compilation
     {
         get;
     }
-    public Compilation Previous
+    public Compilation? Previous
     {
         get;
     }
@@ -44,7 +44,7 @@ public class Compilation
     {
         get;
     }
-    public FunctionSymbol MainFunction => GlobalScope.MainFunction;
+    public FunctionSymbol MainFunction => GlobalScope.MainFunction!;
     public ImmutableArray<FunctionSymbol> Functions => GlobalScope.Functions;
     public ImmutableArray<VariableSymbol> Variables => GlobalScope.Variables;
 

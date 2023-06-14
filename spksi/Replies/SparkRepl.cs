@@ -19,7 +19,7 @@ internal sealed class SparkRepl : Repl
         LoadSubmissions();
     }
 
-    protected override object RenderLine(IReadOnlyList<string> lines, int lineIndex, object state)
+    protected override object? RenderLine(IReadOnlyList<string> lines, int lineIndex, object? state)
     {
         SyntaxTree syntaxTree;
 

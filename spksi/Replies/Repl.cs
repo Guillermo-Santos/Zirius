@@ -26,7 +26,7 @@ internal abstract class Repl
                                            BindingFlags.FlattenHierarchy);
         foreach (var method in methods)
         {
-            var attribute = (MetaCommandAttribute)method.GetCustomAttribute(typeof(MetaCommandAttribute));
+            var attribute = (MetaCommandAttribute?)method.GetCustomAttribute(typeof(MetaCommandAttribute));
             if (attribute == null)
                 continue;
             var metaCommand = new MetaCommand(attribute.Name, attribute.Description, method);
@@ -68,7 +68,7 @@ internal abstract class Repl
             Render();
         }
 
-        private void SubmissionDocumentChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void SubmissionDocumentChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Render();
         }
@@ -77,7 +77,7 @@ internal abstract class Repl
         {
             Console.CursorVisible = false;
             var lineCount = 0;
-            var state = (object)null;
+            var state = (object?)null;
             foreach (var line in _submissionDocument)
             {
                 Console.SetCursorPosition(0, _cursorTop + lineCount);
@@ -91,7 +91,7 @@ internal abstract class Repl
                     Console.Write("· ");
                 }
                 Console.ResetColor();
-                _lineRenderer(_submissionDocument, lineCount, state);
+                _lineRenderer(_submissionDocument, lineCount, state!);
                 Console.WriteLine(new string(' ', Console.WindowWidth - line.Length - 2));
                 lineCount++;
             }
@@ -153,7 +153,7 @@ internal abstract class Repl
         _done = false;
 
         var document = new ObservableCollection<string>() { "" };
-        var view = new SubmissionView(RenderLine, document);
+        var view = new SubmissionView(RenderLine!, document);
 
         while (!_done)
         {
@@ -393,7 +393,7 @@ internal abstract class Repl
         _submissionHistory.Clear();
     }
 
-    protected virtual object RenderLine(IReadOnlyList<string> lines, int lineIndex, object state)
+    protected virtual object? RenderLine(IReadOnlyList<string> lines, int lineIndex, object? state)
     {
         Console.Write(lines[lineIndex]);
         return state;
@@ -543,7 +543,7 @@ internal abstract class Repl
                 {
                     Console.Out.WriteSpace();
                     Console.Out.WritePunctuation("<");
-                    Console.Out.WriteIdentifier(param.Name);
+                    Console.Out.WriteIdentifier(param.Name!);
                     Console.Out.WritePunctuation(">");
                     Console.Out.WriteSpace();
                 }
