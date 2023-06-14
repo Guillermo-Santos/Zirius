@@ -88,7 +88,7 @@ internal sealed class ControlFlowGraph
 
     public sealed class BasicBlockBranch
     {
-        public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression condition)
+        public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression? condition)
         {
             From = from;
             To = to;
@@ -103,7 +103,7 @@ internal sealed class ControlFlowGraph
         {
             get;
         }
-        public BoundExpression Condition
+        public BoundExpression? Condition
         {
             get;
         }

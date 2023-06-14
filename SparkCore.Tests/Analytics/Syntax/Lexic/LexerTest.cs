@@ -188,7 +188,7 @@ public class LexerTest
             (SyntaxKind.StringToken, "\"Te\"\"st\""),
             (SyntaxKind.StringToken, "\"Te\"\"st\""),
         };
-        return fixedTokens.Concat(dynamicTokens);
+        return fixedTokens!.Concat(dynamicTokens);
     }
     /// <summary>
     /// 

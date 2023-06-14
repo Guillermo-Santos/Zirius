@@ -15,7 +15,7 @@ namespace SparkCore;
 
 public class Compilation
 {
-    private BoundGlobalScope _globalScope;
+    private BoundGlobalScope? _globalScope;
     private Compilation(bool isScript, Compilation? previous, params SyntaxTree[] syntaxTrees)
     {
         IsScript = isScript;

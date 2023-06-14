@@ -83,7 +83,7 @@ internal sealed class Emitter
             _knownTypes.Add(typeSymbol, typeReference);
         }
 
-        TypeReference ResolveType(string sparkName, string metadataName)
+        TypeReference ResolveType(string? sparkName, string metadataName)
         {
             var foundTypes = assemblies.SelectMany(a => a.Modules)
                                        .SelectMany(m => m.Types)
@@ -613,7 +613,7 @@ internal sealed class Emitter
         // [a, "foo", "bar", b, ""] --> [a, "foobar", b]
         static IEnumerable<BoundExpression> FoldConstants(IEnumerable<BoundExpression> nodes)
         {
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
 
             foreach (var node in nodes)
             {

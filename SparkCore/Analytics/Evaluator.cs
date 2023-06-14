@@ -14,9 +14,7 @@ internal class Evaluator
     private readonly Dictionary<VariableSymbol, object> _globals;
     private readonly Dictionary<FunctionSymbol, BoundBlockStatement> _functions = new();
     private readonly Stack<Dictionary<VariableSymbol, object>> _locals = new();
-    private Random _random;
-
-    private object _lastValue;
+    private object? _lastValue;
 
     public Evaluator(BoundProgram program, Dictionary<VariableSymbol, object> variables)
     {
@@ -37,7 +35,7 @@ internal class Evaluator
             current = current.Previous;
         }
     }
-    public object Evaluate()
+    public object? Evaluate()
     {
         var function = _program.MainFunction ?? _program.ScriptFunction;
 
@@ -49,7 +47,7 @@ internal class Evaluator
         return EvaluateStatement(body);
     }
 
-    private object EvaluateStatement(BoundBlockStatement body)
+    private object? EvaluateStatement(BoundBlockStatement body)
     {
         var labelToIndex = new Dictionary<BoundLabel, int>();
 
@@ -232,20 +230,18 @@ internal class Evaluator
     {
         if (node.Function == BuiltinFunctions.Input)
         {
-            return Console.ReadLine();
+            return Console.ReadLine() ?? string.Empty;
         }
         else if (node.Function == BuiltinFunctions.Print)
         {
             var value = EvaluateExpression(node.Arguments[0]);
             Console.WriteLine(value);
-            return null;
+            return default!;
         }
         else if (node.Function == BuiltinFunctions.Random)
         {
             var max = (int)EvaluateExpression(node.Arguments[0]);
-            if (_random == null)
-                _random = new();
-            return _random.Next(max);
+            return Random.Shared.Next(max);
         }
         else
         {
@@ -264,7 +260,7 @@ internal class Evaluator
             var result = EvaluateStatement(functionBody);
 
             _locals.Pop();
-            return result;
+            return result!;
         }
     }
     private object EvaluateConversionExpression(BoundConversionExpression node)
@@ -277,7 +273,7 @@ internal class Evaluator
         else if (node.Type == TypeSymbol.Int)
             return Convert.ToInt32(value);
         else if (node.Type == TypeSymbol.String)
-            return Convert.ToString(value);
+            return Convert.ToString(value)!;
         else
             throw new Exception($"Unexpected type {node.Type}.");
     }
