@@ -253,12 +253,8 @@ internal class Evaluator
         else if (node.Function == BuiltinFunctions.Random)
         {
             var max = (int)EvaluateExpression(node.Arguments[0]);
-            if (_random == null)
-            {
-                _random = new();
-            }
-
-            return _random.Next(max);
+            
+            return Random.Shared.Next(max);
         }
         else
         {
