@@ -25,7 +25,7 @@ public abstract partial class Repl
                                            BindingFlags.FlattenHierarchy);
         foreach (var method in methods)
         {
-            var attribute = (MetaCommandAttribute)method.GetCustomAttribute(typeof(MetaCommandAttribute));
+            var attribute = (MetaCommandAttribute?)method.GetCustomAttribute(typeof(MetaCommandAttribute));
             if (attribute == null)
                 continue;
             var metaCommand = new MetaCommand(attribute.Name, attribute.Description, method);
@@ -55,7 +55,7 @@ public abstract partial class Repl
         _done = false;
 
         var document = new ObservableCollection<string>() { "" };
-        var view = new SubmissionView(RenderLine, document);
+        var view = new SubmissionView(RenderLine!, document);
 
         while (!_done)
         {
@@ -295,7 +295,7 @@ public abstract partial class Repl
         _submissionHistory.Clear();
     }
 
-    protected virtual object RenderLine(IReadOnlyList<string> lines, int lineIndex, object state)
+    protected virtual object? RenderLine(IReadOnlyList<string> lines, int lineIndex, object? state)
     {
         Console.Write(lines[lineIndex]);
         return state;
@@ -403,7 +403,7 @@ public abstract partial class Repl
                 {
                     Console.Out.WriteSpace();
                     Console.Out.WritePunctuation("<");
-                    Console.Out.WriteIdentifier(param.Name);
+                    Console.Out.WriteIdentifier(param.Name!);
                     Console.Out.WritePunctuation(">");
                     Console.Out.WriteSpace();
                 }

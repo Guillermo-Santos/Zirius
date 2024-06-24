@@ -38,10 +38,10 @@ namespace SparkCore.Tests.Analytics.Syntax
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "a");
-                    e.AssertToken(op1, op1Text);
+                    e.AssertToken(op1, op1Text!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "b");
-                    e.AssertToken(op2, op2Text);
+                    e.AssertToken(op2, op2Text!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "c");
                 }
@@ -60,11 +60,11 @@ namespace SparkCore.Tests.Analytics.Syntax
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "a");
-                    e.AssertToken(op1, op1Text);
+                    e.AssertToken(op1, op1Text!);
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "b");
-                    e.AssertToken(op2, op2Text);
+                    e.AssertToken(op2, op2Text!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "c");
                 }
@@ -94,10 +94,10 @@ namespace SparkCore.Tests.Analytics.Syntax
                 {
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.UnaryExpression);
-                    e.AssertToken(unaryType, unaryText);
+                    e.AssertToken(unaryType, unaryText!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "a");
-                    e.AssertToken(binaryType, binaryText);
+                    e.AssertToken(binaryType, binaryText!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "b");
                 }
@@ -113,11 +113,11 @@ namespace SparkCore.Tests.Analytics.Syntax
                 using (var e = new AssertingEnumerator(expression))
                 {
                     e.AssertNode(SyntaxKind.UnaryExpression);
-                    e.AssertToken(unaryType, unaryText);
+                    e.AssertToken(unaryType, unaryText!);
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "a");
-                    e.AssertToken(binaryType, binaryText);
+                    e.AssertToken(binaryType, binaryText!);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "b");
                 }

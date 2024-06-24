@@ -80,7 +80,7 @@ internal sealed class Binder
         {
             foreach (var globalstatement in firstGlobalStatementPerSyntaxTree)
             {
-                binder.Diagnostics.ReportOnlyOneFileCanHaveGlobalStatements(globalstatement.Location);
+                binder.Diagnostics.ReportOnlyOneFileCanHaveGlobalStatements(globalstatement!.Location);
             }
         }
 
@@ -641,7 +641,7 @@ internal sealed class Binder
 
         return new BoundCallExpression(function, boundArguments);
     }
-    private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool isReadOnly, TypeSymbol type, BoundConstant constant = null)
+    private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool isReadOnly, TypeSymbol type, BoundConstant? constant = null)
     {
         var name = identifier.Text ?? "?";
         var declare = !identifier.IsMissing;

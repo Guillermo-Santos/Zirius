@@ -14,9 +14,7 @@ internal class Evaluator
     private readonly Dictionary<VariableSymbol, object> _globals;
     private readonly Dictionary<FunctionSymbol, BoundBlockStatement> _functions = new();
     private readonly Stack<Dictionary<VariableSymbol, object>> _locals = new();
-    private Random _random;
-
-    private object _lastValue;
+    private object? _lastValue;
 
     public Evaluator(BoundProgram program, Dictionary<VariableSymbol, object> variables)
     {
@@ -244,13 +242,13 @@ internal class Evaluator
     {
         if (node.Function == BuiltinFunctions.Input)
         {
-            return Console.ReadLine();
+            return Console.ReadLine() ?? string.Empty;
         }
         else if (node.Function == BuiltinFunctions.Print)
         {
             var value = EvaluateExpression(node.Arguments[0]);
             Console.WriteLine(value);
-            return null;
+            return default!;
         }
         else if (node.Function == BuiltinFunctions.Random)
         {
@@ -279,7 +277,7 @@ internal class Evaluator
             var result = EvaluateStatement(functionBody);
 
             _locals.Pop();
-            return result;
+            return result!;
         }
     }
     private object? EvaluateConversionExpression(BoundConversionExpression node)

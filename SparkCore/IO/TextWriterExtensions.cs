@@ -46,7 +46,7 @@ public static class TextWriterExtensions
     {
         writer.WriteKeyword(SyntaxFacts.GetText(kind));
     }
-    public static void WriteKeyword(this TextWriter writer, string test)
+    public static void WriteKeyword(this TextWriter writer, string? test)
     {
         writer.SetForeground(ConsoleColor.Blue);
         writer.Write(test);
@@ -78,7 +78,7 @@ public static class TextWriterExtensions
     {
         writer.WritePunctuation(SyntaxFacts.GetText(kind));
     }
-    public static void WritePunctuation(this TextWriter writer, string test)
+    public static void WritePunctuation(this TextWriter writer, string? test)
     {
         writer.SetForeground(ConsoleColor.DarkGray);
         writer.Write(test);
