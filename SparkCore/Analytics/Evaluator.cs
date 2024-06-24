@@ -37,19 +37,21 @@ internal class Evaluator
             current = current.Previous;
         }
     }
-    public object Evaluate()
+    public object? Evaluate()
     {
         var function = _program.MainFunction ?? _program.ScriptFunction;
 
         if (function == null)
+            {
             return null;
+        }
 
         var body = _functions[function];
 
         return EvaluateStatement(body);
     }
 
-    private object EvaluateStatement(BoundBlockStatement body)
+    private object? EvaluateStatement(BoundBlockStatement body)
     {
         var labelToIndex = new Dictionary<BoundLabel, int>();
 
@@ -115,7 +117,7 @@ internal class Evaluator
     }
 
 
-    private object EvaluateExpression(BoundExpression node)
+    private object? EvaluateExpression(BoundExpression node)
     {
         switch (node.Kind)
         {
@@ -159,7 +161,7 @@ internal class Evaluator
         Assign(a.Variable, value);
         return value;
     }
-    private object EvaluateUnaryExpression(BoundUnaryExpression u)
+    private object? EvaluateUnaryExpression(BoundUnaryExpression u)
     {
         var operand = EvaluateExpression(u.Operand);
         switch (u.Op.Kind)
@@ -184,9 +186,13 @@ internal class Evaluator
         {
             case BoundBinaryOperatorKind.Addition:
                 if (b.Type == TypeSymbol.Int)
+                    {
                     return (int)left + (int)right;
+                }
                 else
+                {
                     return (string)left + (string)right;
+                }
             case BoundBinaryOperatorKind.Substraction:
                 return (int)left - (int)right;
             case BoundBinaryOperatorKind.Multiplication:
@@ -195,17 +201,23 @@ internal class Evaluator
                 return (int)left / (int)right;
             case BoundBinaryOperatorKind.BitwiseAnd:
                 if (b.Type == TypeSymbol.Int)
+                    {
                     return (int)left & (int)right;
+                }
                 else
                     return (bool)left & (bool)right;
             case BoundBinaryOperatorKind.BitwiseOr:
                 if (b.Type == TypeSymbol.Int)
+                    {
                     return (int)left | (int)right;
+                }
                 else
                     return (bool)left | (bool)right;
             case BoundBinaryOperatorKind.BitwiseXor:
                 if (b.Type == TypeSymbol.Int)
+                    {
                     return (int)left ^ (int)right;
+                }
                 else
                     return (bool)left ^ (bool)right;
             case BoundBinaryOperatorKind.LogicalAnd:
@@ -228,7 +240,7 @@ internal class Evaluator
                 throw new Exception($"Unexpected binary operator {b.Op}");
         }
     }
-    private object EvaluateCallExpression(BoundCallExpression node)
+    private object? EvaluateCallExpression(BoundCallExpression node)
     {
         if (node.Function == BuiltinFunctions.Input)
         {
@@ -244,7 +256,10 @@ internal class Evaluator
         {
             var max = (int)EvaluateExpression(node.Arguments[0]);
             if (_random == null)
+            {
                 _random = new();
+            }
+
             return _random.Next(max);
         }
         else
@@ -267,19 +282,29 @@ internal class Evaluator
             return result;
         }
     }
-    private object EvaluateConversionExpression(BoundConversionExpression node)
+    private object? EvaluateConversionExpression(BoundConversionExpression node)
     {
         var value = EvaluateExpression(node.Expression);
         if (node.Type == TypeSymbol.Any)
+        {
             return value;
+        }
         else if (node.Type == TypeSymbol.Bool)
+        {
             return Convert.ToBoolean(value);
+        }
         else if (node.Type == TypeSymbol.Int)
+        {
             return Convert.ToInt32(value);
+        }
         else if (node.Type == TypeSymbol.String)
+        {
             return Convert.ToString(value);
+        }
         else
+        {
             throw new Exception($"Unexpected type {node.Type}.");
+        }
     }
     private void Assign(VariableSymbol variable, object value)
     {

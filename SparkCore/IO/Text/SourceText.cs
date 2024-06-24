@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace SparkCore.IO.Text;
 
@@ -16,13 +18,13 @@ public sealed class SourceText
     {
         return new SourceText(text, fileName);
     }
-    private ImmutableArray<TextLine> ParseLines(SourceText sourceText, string text)
+    private List<TextLine> ParseLines(SourceText sourceText, string text)
     {
-        var result = ImmutableArray.CreateBuilder<TextLine>();
+        var result = new List<TextLine>();
         var position = 0;
         var lineStart = 0;
         while (position < text.Length)
-        {
+        {    
             var lineBreakWidth = GetLineBreakWidth(text, position);
 
             if (lineBreakWidth == 0)
@@ -38,10 +40,13 @@ public sealed class SourceText
             }
         }
         if (position >= lineStart)
+        {
             AddLine(result, sourceText, position, lineStart, 0);
-        return result.ToImmutable();
+        }
+
+        return result;
     }
-    public ImmutableArray<TextLine> Lines
+    public List<TextLine> Lines
     {
         get;
     }
@@ -54,15 +59,16 @@ public sealed class SourceText
     public int GetLineIndex(int position)
     {
         var lower = 0;
-        var upper = Lines.Length - 1;
+        var upper = Lines.Count - 1;
         while (lower <= upper)
         {
             var index = lower + (upper - lower) / 2;
             var start = Lines[index].Start;
 
             if (position == start)
+            {
                 return index;
-
+            }
 
             if (start > position)
             {
@@ -76,7 +82,7 @@ public sealed class SourceText
         return lower - 1;
     }
 
-    private static void AddLine(ImmutableArray<TextLine>.Builder result, SourceText sourceText, int position, int lineStart, int lineBreakWidth)
+    private static void AddLine(List<TextLine> result, SourceText sourceText, int position, int lineStart, int lineBreakWidth)
     {
         var lineLenght = position - lineStart;
         var lineLengthIncludingLinewBreak = lineLenght + lineBreakWidth;
@@ -90,9 +96,14 @@ public sealed class SourceText
         var c = text[position];
         var l = position + 1 >= text.Length ? '\0' : text[position + 1];
         if (c == '\r' && l == '\n')
+        {
             return 2;
+        }
         else if (c == '\r' || c == '\n')
+        {
             return 1;
+        }
+
         return 0;
     }
 

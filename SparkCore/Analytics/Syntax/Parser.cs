@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using SparkCore.Analytics.Syntax.Lexic;
 using SparkCore.Analytics.Syntax.Tree;
@@ -15,7 +16,7 @@ internal sealed class Parser
     private readonly DiagnosticBag _diagnostics = new();
     private readonly SyntaxTree _syntaxTree;
     private readonly SourceText _text;
-    private readonly ImmutableArray<SyntaxToken> _tokens;
+    private readonly SyntaxToken[] _tokens;
     private int _position;
     public Parser(SyntaxTree syntaxTree)
     {
@@ -34,22 +35,26 @@ internal sealed class Parser
             {
                 if (badTokens.Count > 0)
                 {
-                    var leadingTrivia = token.LeadingTrivia.ToBuilder();
+                    var leadingTrivia = token.LeadingTrivia;
                     var index = 0;
 
                     foreach (var badToken in badTokens)
                     {
                         foreach (var lt in badToken.LeadingTrivia)
+                        {
                             leadingTrivia.Insert(index++, lt);
+                        }
 
                         var trivia = new SyntaxTrivia(syntaxTree, SyntaxKind.SkippedTextTrivia, badToken.Position, badToken.Text);
                         leadingTrivia.Insert(index++, trivia);
 
                         foreach (var tt in badToken.TrailingTrivia)
+                        {
                             leadingTrivia.Insert(index++, tt);
+                        }
                     }
                     badTokens.Clear();
-                    token = new(token.SyntaxTree, token.Kind, token.Position, token.Text, token.Value, leadingTrivia.ToImmutable(), token.TrailingTrivia);
+                    token = new(token.SyntaxTree, token.Kind, token.Position, token.Text, token.Value, leadingTrivia, token.TrailingTrivia);
                 }
                 tokens.Add(token);
             }
@@ -57,7 +62,7 @@ internal sealed class Parser
 
         _syntaxTree = syntaxTree;
         _text = syntaxTree.Text;
-        _tokens = tokens.ToImmutableArray();
+        _tokens = tokens.ToArray();
         _diagnostics.AddRange(lexer.Diagnostics);
     }
     public DiagnosticBag Diagnostics => _diagnostics;
@@ -66,9 +71,15 @@ internal sealed class Parser
     {
         var index = _position + offset;
         if (index >= _tokens.Length)
+        {
             return _tokens[_tokens.Length - 1];
+        }
+
         if (index < 0)
+        {
             return _tokens[0];
+        }
+
         return _tokens[index];
     }
     private SyntaxToken Current => Peek(0);
@@ -81,9 +92,12 @@ internal sealed class Parser
     private SyntaxToken MatchToken(SyntaxKind type)
     {
         if (Current.Kind == type)
+        {
             return NextToken();
+        }
+
         _diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, type);
-        return new SyntaxToken(_syntaxTree, type, Current.Position, null, null, ImmutableArray<SyntaxTrivia>.Empty, ImmutableArray<SyntaxTrivia>.Empty);
+        return new SyntaxToken(_syntaxTree, type, Current.Position, null, null, new List<SyntaxTrivia>(), new List<SyntaxTrivia>());
     }
 
     public CompilationUnitSyntax ParseCompilationUnit()
@@ -93,9 +107,9 @@ internal sealed class Parser
         return new CompilationUnitSyntax(_syntaxTree, members, endOfFileToken);
     }
 
-    private ImmutableArray<MemberSyntax> ParseMembers()
+    private IEnumerable<MemberSyntax> ParseMembers()
     {
-        var members = ImmutableArray.CreateBuilder<MemberSyntax>();
+        var members = new List<MemberSyntax>();
 
         while (Current.Kind != SyntaxKind.EndOfFileToken)
         {
@@ -109,7 +123,7 @@ internal sealed class Parser
             // let's skip the current token and continue
             // in order to avoid an infinite loop.
             //
-            // We don't nned to report error, because we'll
+            // We don't need to report error, because we'll
             // already tried to parse an expression statement
             // and repored one.
             if (Current == startToken)
@@ -119,7 +133,7 @@ internal sealed class Parser
 
         }
 
-        return members.ToImmutable();
+        return members;
     }
 
     private MemberSyntax ParseMember()
@@ -138,13 +152,13 @@ internal sealed class Parser
         var closeParentesisToken = MatchToken(SyntaxKind.CloseParentesisToken);
         var type = ParseOptionalTypeClause();
         var body = ParseBlockStatement();
-
+        
         return new FunctionDeclarationSyntax(_syntaxTree, functionKeyword, identifier, openParentesisToken, parameters, closeParentesisToken, type, body);
     }
     private SeparatedSyntaxList<ParameterSyntax> ParseParameterList()
     {
 
-        var nodesAndSeparators = ImmutableArray.CreateBuilder<SyntaxNode>();
+        var nodesAndSeparators = new List<SyntaxNode>();
 
         var parseNextParameter = true;
         while (parseNextParameter &&
@@ -165,7 +179,7 @@ internal sealed class Parser
             }
 
         }
-        return new SeparatedSyntaxList<ParameterSyntax>(nodesAndSeparators.ToImmutable());
+        return new SeparatedSyntaxList<ParameterSyntax>(nodesAndSeparators);
     }
     private ParameterSyntax ParseParameter()
     {
@@ -209,7 +223,7 @@ internal sealed class Parser
     }
     private BlockStatementSyntax ParseBlockStatement()
     {
-        var statements = ImmutableArray.CreateBuilder<StatementSyntax>();
+        var statements = new List<StatementSyntax>();
         var openBraceToken = MatchToken(SyntaxKind.OpenBraceToken);
         while (Current.Kind != SyntaxKind.EndOfFileToken &&
               Current.Kind != SyntaxKind.CloseBraceToken)
@@ -232,7 +246,7 @@ internal sealed class Parser
 
         }
         var CloseBraceToken = MatchToken(SyntaxKind.CloseBraceToken);
-        return new BlockStatementSyntax(_syntaxTree, openBraceToken, statements.ToImmutable(), CloseBraceToken);
+        return new BlockStatementSyntax(_syntaxTree, openBraceToken, statements, CloseBraceToken);
     }
     private StatementSyntax ParseVariableDeclaration()
     {
@@ -431,7 +445,7 @@ internal sealed class Parser
     }
     private SeparatedSyntaxList<ExpressionSyntax> ParseArguments()
     {
-        var nodesAndSeparators = ImmutableArray.CreateBuilder<SyntaxNode>();
+        var nodesAndSeparators = new List<SyntaxNode>();
 
         var parseNextArgument = true;
         while (parseNextArgument &&
@@ -453,7 +467,7 @@ internal sealed class Parser
             }
 
         }
-        return new SeparatedSyntaxList<ExpressionSyntax>(nodesAndSeparators.ToImmutable());
+        return new SeparatedSyntaxList<ExpressionSyntax>(nodesAndSeparators);
     }
     private ExpressionSyntax ParseNameExpression()
     {

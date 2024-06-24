@@ -6,9 +6,9 @@ public struct TextSpan
         Start = start;
         Length = length;
     }
-    public int Start;
+    public int Start { get; init; }
     public int Length;
-    public int End => Start + Length;
+    public readonly int End => Start + Length;
 
     public static TextSpan FromBounds(int start, int end)
     {

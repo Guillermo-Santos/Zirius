@@ -71,17 +71,13 @@ internal sealed class ControlFlowGraph
             if (IsEnd)
                 return "<End>";
 
-            using (var writter = new StringWriter())
+            using var writter = new StringWriter();
+            using var indentedWriter = new IndentedTextWriter(writter);
+            foreach (var statement in Statements)
             {
-                using (var indentedWriter = new IndentedTextWriter(writter))
-                {
-                    foreach (var statement in Statements)
-                    {
-                        statement.WriteTo(indentedWriter);
-                    }
-                    return writter.ToString();
-                }
+                statement.WriteTo(indentedWriter);
             }
+            return writter.ToString();
         }
 
     }
@@ -306,7 +302,9 @@ internal sealed class ControlFlowGraph
             }
             // We negate the expression --> !expression
             var op = BoundUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
-            Debug.Assert(op != null);
+
+            ArgumentNullException.ThrowIfNull(op, nameof(op));
+
             return new BoundUnaryExpression(op, condition);
         }
     }
@@ -355,7 +353,7 @@ internal sealed class ControlFlowGraph
         var graphBuilder = new GraphBuilder();
         var graph = graphBuilder.Build(blocks);
 
-        var statements = ImmutableArray.CreateBuilder<BoundStatement>();
+        var statements = new List<BoundStatement>();
 
         foreach (var block in graph.Blocks)
         {
@@ -364,7 +362,7 @@ internal sealed class ControlFlowGraph
                 statements.Add(statement);
             }
         }
-        loweredbody = new BoundBlockStatement(statements.ToImmutable());
+        loweredbody = new BoundBlockStatement(statements);
 
         return graph;
     }
@@ -378,7 +376,9 @@ internal sealed class ControlFlowGraph
             var lastStatement = branch.From.Statements.LastOrDefault();
 
             if (lastStatement == null || lastStatement.Kind != BoundNodeKind.ReturnStatement)
+            {
                 return false;
+            }
         }
 
         return true;

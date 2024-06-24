@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using SparkCore.Analytics.Syntax.Lexic;
 using SparkCore.Analytics.Syntax.Tree.Nodes;
 using SparkCore.IO.Diagnostics;
@@ -12,7 +14,7 @@ public sealed class SyntaxTree
 {
     private delegate void ParseHandler(SyntaxTree syntaxTree,
                                        out CompilationUnitSyntax root,
-                                       out ImmutableArray<Diagnostic> diagnostics);
+                                       out IEnumerable<Diagnostic> diagnostics);
     private SyntaxTree(SourceText text, ParseHandler handler)
     {
         Text = text;
@@ -27,7 +29,7 @@ public sealed class SyntaxTree
     {
         get;
     }
-    public ImmutableArray<Diagnostic> Diagnostics
+    public IEnumerable<Diagnostic> Diagnostics
     {
         get;
     }
@@ -42,11 +44,11 @@ public sealed class SyntaxTree
         var sourceText = SourceText.From(text, fileName);
         return Parse(sourceText);
     }
-    private static void Parse(SyntaxTree syntaxTree, out CompilationUnitSyntax root, out ImmutableArray<Diagnostic> diagnostics)
+    private static void Parse(SyntaxTree syntaxTree, out CompilationUnitSyntax root, out IEnumerable<Diagnostic> diagnostics)
     {
         var parser = new Parser(syntaxTree);
         root = parser.ParseCompilationUnit();
-        diagnostics = parser.Diagnostics.ToImmutableArray();
+        diagnostics = parser.Diagnostics;
     }
     public static SyntaxTree Parse(string text)
     {
@@ -57,25 +59,25 @@ public sealed class SyntaxTree
     {
         return new SyntaxTree(text, Parse);
     }
-    public static ImmutableArray<SyntaxToken> ParseTokens(string text, bool includeEndOfFile = false)
+    public static IEnumerable   <SyntaxToken> ParseTokens(string text, bool includeEndOfFile = false)
     {
         var sourceText = SourceText.From(text);
         return ParseTokens(sourceText, includeEndOfFile);
     }
-    public static ImmutableArray<SyntaxToken> ParseTokens(string text, out ImmutableArray<Diagnostic> diagnostics, bool includeEndOfFile = false)
+    public static IEnumerable<SyntaxToken> ParseTokens(string text, out IEnumerable<Diagnostic> diagnostics, bool includeEndOfFile = false)
     {
         var sourceText = SourceText.From(text);
         return ParseTokens(sourceText, out diagnostics, includeEndOfFile);
     }
-    public static ImmutableArray<SyntaxToken> ParseTokens(SourceText text, bool includeEndOfFile = false)
+    public static IEnumerable<SyntaxToken> ParseTokens(SourceText text, bool includeEndOfFile = false)
     {
         return ParseTokens(text, out _, includeEndOfFile);
     }
-    public static ImmutableArray<SyntaxToken> ParseTokens(SourceText text, out ImmutableArray<Diagnostic> diagnostics, bool includeEndOfFile = false)
+    public static IEnumerable<SyntaxToken> ParseTokens(SourceText text, out IEnumerable<Diagnostic> diagnostics, bool includeEndOfFile = false)
     {
         var tokens = new List<SyntaxToken>();
 
-        void ParseTokens(SyntaxTree st, out CompilationUnitSyntax root, out ImmutableArray<Diagnostic> d)
+        void ParseTokens(SyntaxTree st, out CompilationUnitSyntax root, out IEnumerable<Diagnostic> d)
         {
 
             var l = new LexicAnalyzer(st);
@@ -83,19 +85,22 @@ public sealed class SyntaxTree
             {
                 var token = l.Lex();
                 if (token.Kind != SyntaxKind.EndOfFileToken || includeEndOfFile)
+                {
                     tokens.Add(token);
+                }
+
                 if (token.Kind == SyntaxKind.EndOfFileToken)
                 {
-                    root = new CompilationUnitSyntax(st, ImmutableArray<MemberSyntax>.Empty, token);
+                    root = new CompilationUnitSyntax(st, Array.Empty<MemberSyntax>(), token);
                     break;
                 }
             }
-            d = l.Diagnostics.ToImmutableArray();
+            d = l.Diagnostics;
         }
 
         var syntaxTree = new SyntaxTree(text, ParseTokens);
 
-        diagnostics = syntaxTree.Diagnostics.ToImmutableArray();
-        return tokens.ToImmutableArray();
+        diagnostics = syntaxTree.Diagnostics;
+        return tokens;
     }
 }

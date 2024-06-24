@@ -1,16 +1,18 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace SparkCore.Analytics.Binding.Tree.Statements
 {
     internal sealed class BoundBlockStatement : BoundStatement
     {
-        public BoundBlockStatement(ImmutableArray<BoundStatement> statements)
+        public BoundBlockStatement(IEnumerable<BoundStatement> statements)
         {
-            Statements = statements;
+            Statements = statements.ToArray();
         }
 
         public override BoundNodeKind Kind => BoundNodeKind.BlockStatement;
-        public ImmutableArray<BoundStatement> Statements
+        public BoundStatement[] Statements
         {
             get;
         }

@@ -1,4 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using SparkCore.Analytics.Symbols;
 using SparkCore.Analytics.Syntax.Tree;
@@ -7,7 +11,7 @@ using SparkCore.IO.Text;
 
 namespace SparkCore.Analytics.Syntax.Lexic;
 
-internal sealed class LexicAnalyzer
+internal sealed class LexicAnalyzer : IEnumerable<SyntaxToken>
 {
     private readonly DiagnosticBag _diagnostics = new();
     private readonly SyntaxTree _syntaxTree;
@@ -17,7 +21,7 @@ internal sealed class LexicAnalyzer
     private int _start;
     private SyntaxKind _kind;
     private object? _value;
-    private readonly ImmutableArray<SyntaxTrivia>.Builder _triviaBuilder = ImmutableArray.CreateBuilder<SyntaxTrivia>();
+    private readonly List<SyntaxTrivia> _triviaBuilder = new();
 
     public LexicAnalyzer(SyntaxTree syntaxTree)
     {
@@ -30,16 +34,14 @@ internal sealed class LexicAnalyzer
     private char Peek(int offset)
     {
         var index = _position + offset;
-        if (index >= _text.Length)
-            return '\0';
-        return _text[index];
+        return index >= _text.Length ? '\0' : _text[index];
     }
 
     public SyntaxToken Lex()
     {
         ReadTrivia(leading: true);
 
-        var leadingTrivia = _triviaBuilder.ToImmutable();
+        var leadingTrivia = _triviaBuilder.ToArray();
         var tokenStart = _position;
 
         ReadToken();
@@ -48,12 +50,11 @@ internal sealed class LexicAnalyzer
         var tokenLength = _position - _start;
 
         ReadTrivia(leading: false);
-        var trailingTrivia = _triviaBuilder.ToImmutable();
+        var trailingTrivia = _triviaBuilder.ToArray();
 
         var tokenText = SyntaxFacts.GetText(tokenKind);
-        if (tokenText == null)
-            tokenText = _text.ToString(tokenStart, tokenLength);
-        return new SyntaxToken(_syntaxTree, tokenKind, tokenStart, tokenText, tokenValue, leadingTrivia, trailingTrivia);
+        tokenText ??= _text.ToString(tokenStart, tokenLength);
+        return new SyntaxToken(_syntaxTree, tokenKind, tokenStart, tokenText, tokenValue, leadingTrivia.ToList(), trailingTrivia.ToList());
     }
 
     private void ReadTrivia(bool leading)
@@ -89,7 +90,10 @@ internal sealed class LexicAnalyzer
                 case '\n':
                 case '\r':
                     if (!leading)
+                    {
                         done = true;
+                    }
+
                     ReadLineBreak();
                     break;
                 case ' ':
@@ -429,9 +433,44 @@ internal sealed class LexicAnalyzer
     private void ReadIdentifierOrKeywordToken()
     {
         while (char.IsLetter(Current) || char.Equals(Current, '_') || char.IsDigit(Current))
+        {
             _position++;
+        }
+
         var length = _position - _start;
         var text = _text.ToString(_start, length);
         _kind = SyntaxFacts.GetKeywordType(text);
+    }
+
+    public Enumerator GetEnumerator() => new(this);
+    IEnumerator<SyntaxToken> IEnumerable<SyntaxToken>.GetEnumerator() => new Enumerator(this);
+    IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+
+    public class Enumerator : IEnumerator<SyntaxToken>
+    {
+        private SyntaxToken _token;
+        private readonly LexicAnalyzer lexer;
+
+        public SyntaxToken Current => _token;
+        object IEnumerator.Current => Current;
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        public Enumerator(LexicAnalyzer lexer)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        {
+            this.lexer = lexer;
+        }
+
+        public void Dispose() => Reset();
+        public bool MoveNext()
+        {
+            _token = lexer.Lex();
+            return _token.Kind is not SyntaxKind.EndOfFileToken;
+        }
+        public void Reset()
+        {
+            lexer._position = 0;
+            lexer._start = 0;
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using SparkCore.Analytics.Binding.Tree.Expressions;
 using SparkCore.Analytics.Binding.Tree.Statements;
 
@@ -43,30 +45,30 @@ internal abstract class BoundTreeRewriter
 
     protected virtual BoundStatement RewriteBlockStatement(BoundBlockStatement node)
     {
-        ImmutableArray<BoundStatement>.Builder? builder = null;
+        List<BoundStatement>? builder = null;
 
-        for (var i = 0; i < node.Statements.Length; i++)
+        var statements = node.Statements.ToList();
+        for (var i = 0; i < statements.Count; i++)
         {
-            var oldStatement = node.Statements[i];
-            var newStatement = RewriteStatement(node.Statements[i]);
+            var oldStatement = statements[i];
+            var newStatement = RewriteStatement(statements[i]);
             if (newStatement != oldStatement)
             {
                 if (builder == null)
                 {
-                    builder = ImmutableArray.CreateBuilder<BoundStatement>(node.Statements.Length);
+                    builder = new(statements.Count);
 
                     for (var j = 0; j < i; j++)
-                        builder.Add(node.Statements[j]);
+                    {
+                        builder.Add(statements[j]);
+                    }
                 }
             }
 
             if (builder != null)
                 builder.Add(newStatement);
         }
-        if (builder == null)
-            return node;
-
-        return new BoundBlockStatement(builder.MoveToImmutable());
+        return builder == null ? (BoundStatement)node : new BoundBlockStatement(builder);
     }
     protected virtual BoundStatement RewriteBoundNopStatement(BoundNopStatement node)
     {
@@ -207,30 +209,28 @@ internal abstract class BoundTreeRewriter
     }
     protected virtual BoundExpression RewriteCallExpression(BoundCallExpression node)
     {
-        ImmutableArray<BoundExpression>.Builder? builder = null;
+        List<BoundExpression>? builder = null;
 
-        for (var i = 0; i < node.Arguments.Length; i++)
+        var arguments = node.Arguments.ToList();
+        for (var i = 0; i < arguments.Count; i++)
         {
-            var oldArgument = node.Arguments[i];
-            var newArgument = RewriteExpression(node.Arguments[i]);
+            var oldArgument = arguments[i];
+            var newArgument = RewriteExpression(arguments[i]);
             if (newArgument != oldArgument)
             {
                 if (builder == null)
                 {
-                    builder = ImmutableArray.CreateBuilder<BoundExpression>(node.Arguments.Length);
+                    builder = new List<BoundExpression>(arguments.Count);
 
                     for (var j = 0; j < i; j++)
-                        builder.Add(node.Arguments[j]);
+                        builder.Add(arguments[j]);
                 }
             }
 
             if (builder != null)
                 builder.Add(newArgument);
         }
-        if (builder == null)
-            return node;
-
-        return new BoundCallExpression(node.Function, builder.MoveToImmutable());
+        return builder == null ? (BoundExpression)node : new BoundCallExpression(node.Function, builder);
     }
     protected virtual BoundExpression RewriteConversionExpression(BoundConversionExpression node)
     {

@@ -464,7 +464,7 @@ public class EvaluationTests
             throw new Exception("ERROR: Must mark as many spans as there are diagnostics.");
 
         var diagnostics = result.Diagnostics;
-        Assert.Equal(expectedDiagnostics.Length, diagnostics.Length);
+        Assert.Equal(expectedDiagnostics.Length, diagnostics.Count);
 
         for (var i = 0; i < expectedDiagnostics.Length; i++)
         {

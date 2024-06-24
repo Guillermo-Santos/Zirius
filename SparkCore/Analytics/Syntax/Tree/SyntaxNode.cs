@@ -24,18 +24,22 @@ public abstract class SyntaxNode
     {
         get
         {
-            var first = GetChildren().First().Span;
-            var last = GetChildren().Last().Span;
-            return TextSpan.FromBounds(first.Start, last.End);
+            var visitor = new TextSpanVisitor();
+            return visitor.Visit(this);
+            //var first = GetChildren().First().Span;
+            //var last = GetChildren().Last().Span;
+            //return TextSpan.FromBounds(first.Start, last.End);
         }
     }
     public virtual TextSpan FullSpan
     {
         get
         {
-            var first = GetChildren().First().FullSpan;
-            var last = GetChildren().Where(child => child != null).Last().FullSpan;
-            return TextSpan.FromBounds(first.Start, last.End);
+            var visitor = new FullTextSpanVisitor();
+            return visitor.Visit(this);
+            //var first = GetChildren().First().FullSpan;
+            //var last = GetChildren().Last().FullSpan;
+            //return TextSpan.FromBounds(first.Start, last.End);
         }
     }
 
@@ -44,10 +48,33 @@ public abstract class SyntaxNode
     public SyntaxToken GetLastToken()
     {
         if (this is SyntaxToken token)
+        {
             return token;
+        }
+
         return GetChildren().Last().GetLastToken();
     }
     public abstract IEnumerable<SyntaxNode> GetChildren();
+
+    /// <summary>
+    /// Calls the appropiate Visit[<see cref="SyntaxNode"/>] method of the <paramref name="visitor"/>
+    /// </summary>
+    /// <param name="visitor"></param>
+    public virtual void Accept(SyntaxNodeVisitor visitor)
+    {
+        visitor.DefaultVisit(this);
+    }
+
+    /// <summary>
+    /// Calls the appropiate Visit[<see cref="SyntaxNode"/>] method of the <paramref name="visitor"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="visitor"></param>
+    /// <returns>A <typeparamref name="T"/> object or null</returns>
+    public virtual T? Accept<T>(SyntaxNodeVisitor<T> visitor)
+    {
+        return visitor.DefaultVisit(this);
+    }
     public void WriteTo(TextWriter writter, bool withTrivia = true)
     {
         PrettyPrint(writter, this, withTrivia);
@@ -145,5 +172,6 @@ public abstract class SyntaxNode
             return writter.ToString();
         }
     }
+
 
 }

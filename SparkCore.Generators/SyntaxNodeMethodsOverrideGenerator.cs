@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +14,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace SparkCore.Generators
 {
     [Generator]
-    public class SyntaxNodeGetChildrenGenerator : ISourceGenerator
+    public class SyntaxNodeMethodsOverrideGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
@@ -59,6 +60,9 @@ namespace SparkCore.Generators
                     indentedTextWriter.WriteLine($"partial class {type.Name}");
                     StartBlock(indentedTextWriter);
 
+                    indentedTextWriter.WriteLine($"public override void Accept(SyntaxNodeVisitor visitor) => visitor.Visit{type.Name}(this);");
+                    indentedTextWriter.WriteLine($"public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.Visit{type.Name}(this);");
+
                     indentedTextWriter.WriteLine("public override IEnumerable<SyntaxNode> GetChildren()");
                     StartBlock(indentedTextWriter);
 
@@ -68,6 +72,10 @@ namespace SparkCore.Generators
                         {
                             if (IsDerivedFrom(propertyType, syntaxNodeType))
                             {
+                                if(property.NullableAnnotation == NullableAnnotation.Annotated)
+                                {
+                                    indentedTextWriter.Write($"if({property.Name} is not null)");
+                                }
                                 indentedTextWriter.WriteLine($"yield return {property.Name};");
                             }
                             else if (propertyType.TypeArguments.Length == 1 &&
@@ -106,7 +114,9 @@ namespace SparkCore.Generators
 
             var fileName = Path.Combine(treeDirectory, "SyntaxNode_GetChildren.txt");
             using (var writer = new StreamWriter(fileName))
+            {
                 sourceText.Write(writer);
+            }
         }
 
         private static void WriteNameSpaceHead(INamedTypeSymbol syntaxNodeType, IndentedTextWriter indentedTextWriter, INamedTypeSymbol type)

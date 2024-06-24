@@ -123,7 +123,9 @@ public static class SyntaxFacts
         foreach (var type in types)
         {
             if (GetBinaryOperatorPrecedence(type) > 0)
+            {
                 yield return type;
+            }
         }
     }
     public static string? GetText(SyntaxKind type)

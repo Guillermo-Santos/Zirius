@@ -5,7 +5,7 @@ using SparkCore.IO;
 
 namespace spi.Replies;
 
-internal sealed class SparkRepl : Repl
+public sealed class SparkRepl : Repl
 {
     private bool _loadingSubmission;
     private static readonly Compilation emptyCompilation = Compilation.CreateScript(null);
@@ -21,51 +21,41 @@ internal sealed class SparkRepl : Repl
 
     protected override object RenderLine(IReadOnlyList<string> lines, int lineIndex, object state)
     {
+        //Console.WriteLine(DateTime.UtcNow);
         SyntaxTree syntaxTree;
 
-        if (state == null)
+        //if (state is null)
         {
             var text = string.Join(Environment.NewLine, lines);
             syntaxTree = SyntaxTree.Parse(text);
         }
-        else
-        {
-            syntaxTree = (SyntaxTree)state;
-        }
+        //else
+        //{
+        //    syntaxTree = (SyntaxTree)state;
+        //}
 
         var lineSpan = syntaxTree.Text.Lines[lineIndex].Span;
-        var classifiedSpans = Classifier.Classify(syntaxTree, lineSpan);
+        var classifierVisitor = new SyntaxHightLightVisitor
+        {
+            TextSpan = lineSpan
+        };
 
-        foreach (var classifiedSpan in classifiedSpans)
+        classifierVisitor.Visit(syntaxTree.Root);
+
+        foreach (var classifiedSpan in classifierVisitor.ClassifiedSpans)
         {
             var classifiedText = syntaxTree.Text.ToString(classifiedSpan.Span);
-
-            switch (classifiedSpan.Classification)
+            
+            Console.ForegroundColor = classifiedSpan.Classification switch
             {
-                case Classification.Keyword:
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    break;
-                case Classification.Identifier:
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    break;
-                case Classification.Number:
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    break;
-                case Classification.String:
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    break;
-                case Classification.Comment:
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;
-                    break;
-                case Classification.Operator:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    break;
-                case Classification.Text:
-                default:
-                    Console.ForegroundColor = ConsoleColor.White;
-                    break;
-            }
-
+                Classification.Keyword => ConsoleColor.Blue,
+                Classification.Identifier => ConsoleColor.Cyan,
+                Classification.Number => ConsoleColor.DarkYellow,
+                Classification.String => ConsoleColor.Magenta,
+                Classification.Comment => ConsoleColor.DarkGreen,
+                Classification.Operator => ConsoleColor.DarkGray,
+                _ => ConsoleColor.White,
+            };
             Console.Write(classifiedText);
             Console.ResetColor();
         }
@@ -184,7 +174,7 @@ internal sealed class SparkRepl : Repl
                 Console.ResetColor();
             }
             _previous = compilation;
-            SaveSubmission(text);
+            //SaveSubmission(text);
 
         }
         else
@@ -203,11 +193,16 @@ internal sealed class SparkRepl : Repl
     {
         var submissionsDirectory = GetSubmissionsDirectory();
         if (!Directory.Exists(submissionsDirectory))
+        {
             return;
+        }
+
         var files = Directory.GetFiles(submissionsDirectory).OrderBy(f => f).ToArray();
 
         if (files.Length == 0)
+        {
             return;
+        }
 
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.WriteLine($"Loaded {files.Length} submission(s)");
@@ -227,12 +222,17 @@ internal sealed class SparkRepl : Repl
     {
         var dir = GetSubmissionsDirectory();
         if (Directory.Exists(dir))
+        {
             Directory.Delete(dir, recursive: true);
+        }
     }
     private void SaveSubmission(string text)
     {
         if (_loadingSubmission)
+        {
             return;
+        }
+
         var submissionsDirectory = GetSubmissionsDirectory();
         Directory.CreateDirectory(submissionsDirectory);
 

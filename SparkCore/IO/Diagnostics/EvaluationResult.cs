@@ -1,16 +1,19 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace SparkCore.IO.Diagnostics;
 
 public sealed class EvaluationResult
 {
-    public EvaluationResult(ImmutableArray<Diagnostic> diagnostics, object? value)
+    public EvaluationResult(IEnumerable<Diagnostic> diagnostics, object? value)
     {
-        Diagnostics = diagnostics;
+        Diagnostics = diagnostics.ToList();
         Value = value;
     }
 
-    public ImmutableArray<Diagnostic> Diagnostics
+    public List<Diagnostic> Diagnostics
     {
         get;
     }

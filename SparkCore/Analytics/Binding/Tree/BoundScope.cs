@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using SparkCore.Analytics.Symbols;
@@ -37,13 +38,13 @@ internal sealed class BoundScope
         return Parent?.TryLookupSymbol(name);
     }
 
-    public ImmutableArray<VariableSymbol> GetDeclaredVariales() => GetDeclaredSymbols<VariableSymbol>();
-    public ImmutableArray<FunctionSymbol> GetDeclaredFunctions() => GetDeclaredSymbols<FunctionSymbol>();
-    public ImmutableArray<TSymbol> GetDeclaredSymbols<TSymbol>()
+    public IEnumerable<VariableSymbol> GetDeclaredVariales() => GetDeclaredSymbols<VariableSymbol>();
+    public IEnumerable<FunctionSymbol> GetDeclaredFunctions() => GetDeclaredSymbols<FunctionSymbol>();
+    public IEnumerable<TSymbol> GetDeclaredSymbols<TSymbol>()
         where TSymbol : Symbol
     {
         if (_symbols == null)
-            return ImmutableArray<TSymbol>.Empty;
-        return _symbols.Values.OfType<TSymbol>().ToImmutableArray();
+            return Array.Empty<TSymbol>();
+        return _symbols.Values.OfType<TSymbol>();
     }
 }

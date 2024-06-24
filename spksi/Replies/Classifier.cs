@@ -52,14 +52,17 @@ public sealed class Classifier
     private static void AddClassification(SyntaxKind elementKind, TextSpan elementSpan, TextSpan span, ImmutableArray<ClassifiedSpan>.Builder result)
     {
         if (!elementSpan.OverlapsWith(span))
+        {
             return;
+        }
+
         var adjustedStart = Math.Max(elementSpan.Start, span.Start);
         var adjustedEnd = Math.Min(elementSpan.End, span.End);
         var adjustedSpan = TextSpan.FromBounds(adjustedStart, adjustedEnd);
         var classification = GetClassification(elementKind);
 
-        var clasifiedSpan = new ClassifiedSpan(adjustedSpan, classification);
-        result.Add(clasifiedSpan);
+        var classifiedSpan = new ClassifiedSpan(adjustedSpan, classification);
+        result.Add(classifiedSpan);
     }
 
     private static Classification GetClassification(SyntaxKind elementKind)

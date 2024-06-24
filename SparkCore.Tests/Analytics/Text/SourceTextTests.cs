@@ -11,7 +11,7 @@ namespace SparkCore.Tests.Analytics.Text
         public void SourceText_IncludesLastLine(string text, int expectedLineCount)
         {
             var sourceText = SourceText.From(text);
-            Assert.Equal(expectedLineCount, sourceText.Lines.Length);
+            Assert.Equal(expectedLineCount, sourceText.Lines.Count);
         }
     }
 }

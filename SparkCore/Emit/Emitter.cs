@@ -177,10 +177,13 @@ internal sealed class Emitter
         }
     }
 
-    public static ImmutableArray<Diagnostic> Emit(BoundProgram program, string moduleName, string[] references, string outputPath)
+    public static IEnumerable<Diagnostic> Emit(BoundProgram program, string moduleName, string[] references, string outputPath)
     {
         if (program.Diagnostics.Any())
-            return program.Diagnostics;
+        {
+            return program?.Diagnostics;
+        }
+
         try
         {
             var emitter = new Emitter(moduleName, references);
@@ -188,13 +191,15 @@ internal sealed class Emitter
         }
         catch (MissingDependencyException)
         {
-            return ImmutableArray<Diagnostic>.Empty;
+            return Array.Empty<Diagnostic>();
         }
     }
-    public ImmutableArray<Diagnostic> Emit(BoundProgram program, string outputPath)
+    public IEnumerable<Diagnostic> Emit(BoundProgram program, string outputPath)
     {
         if (_diagnostics.Any())
+        {
             return _diagnostics.ToImmutableArray();
+        }
 
         foreach (var functionWithBody in program.Functions)
         {
@@ -207,7 +212,9 @@ internal sealed class Emitter
         }
 
         if (program.MainFunction != null)
-            _assemmblyDefinition.EntryPoint = _methods[program.MainFunction]; 
+        {
+            _assemmblyDefinition.EntryPoint = _methods[program.MainFunction];
+        }
 
         _assemmblyDefinition.Write(outputPath);
 
@@ -244,12 +251,12 @@ internal sealed class Emitter
             EmitStatement(ilProcessor, statement);
         }
 
-        foreach (var fixup in _fixuds)
+        foreach (var (InstructionIndex, Target) in _fixuds)
         {
-            var targetLabel = fixup.Target;
+            var targetLabel = Target;
             var targetInstructionIndex = _labels[targetLabel];
             var targetInstruction = ilProcessor.Body.Instructions[targetInstructionIndex];
-            var instructionToFixup = ilProcessor.Body.Instructions[fixup.InstructionIndex];
+            var instructionToFixup = ilProcessor.Body.Instructions[InstructionIndex];
             instructionToFixup.Operand = targetInstruction;
         }
 

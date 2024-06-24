@@ -55,7 +55,9 @@ namespace SparkCore.Tests.Analytics
             }
 
             if (startStack.Count != 0)
+            {
                 throw new ArgumentException("Missing ']' in text.", nameof(text));
+            }
 
             return new AnnotatedText(textBuilder.ToString(), spanBuilder.ToImmutable());
         }
@@ -71,8 +73,10 @@ namespace SparkCore.Tests.Analytics
             using (var reader = new StringReader(text))
             {
                 string line;
-                while ((line = reader.ReadLine()) != null)
+                while ((line = reader.ReadLine()!) != null)
+                {
                     lines.Add(line);
+                }
             }
 
             var minIndentation = int.MaxValue;
@@ -88,18 +92,25 @@ namespace SparkCore.Tests.Analytics
                 minIndentation = Math.Min(minIndentation, indentation);
             }
 
-            for (int i = 0; i < lines.Count; i++)
+            for (var i = 0; i < lines.Count; i++)
             {
                 if (lines[i].Length == 0)
+                {
                     continue;
+                }
+
                 lines[i] = lines[i].Substring(minIndentation);
             }
 
             while (lines.Count > 0 && lines[0].Length == 0)
+            {
                 lines.RemoveAt(0);
+            }
 
             while (lines.Count > 0 && lines[lines.Count - 1].Length == 0)
+            {
                 lines.RemoveAt(lines.Count - 1);
+            }
 
             return lines.ToArray();
         }

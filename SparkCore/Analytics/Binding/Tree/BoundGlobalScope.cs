@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using SparkCore.Analytics.Binding.Tree.Statements;
 using SparkCore.Analytics.Symbols;
 using SparkCore.IO.Diagnostics;
@@ -6,7 +7,7 @@ using SparkCore.IO.Diagnostics;
 namespace SparkCore.Analytics.Binding.Tree;
 internal sealed class BoundGlobalScope
 {
-    public BoundGlobalScope(BoundGlobalScope? previous, ImmutableArray<Diagnostic> diagnostics, FunctionSymbol? mainFunction, FunctionSymbol? scriptFunction, ImmutableArray<FunctionSymbol> functions, ImmutableArray<VariableSymbol> variables, ImmutableArray<BoundStatement> statements)
+    public BoundGlobalScope(BoundGlobalScope? previous, IEnumerable<Diagnostic> diagnostics, FunctionSymbol? mainFunction, FunctionSymbol? scriptFunction, IEnumerable<FunctionSymbol> functions, IEnumerable<VariableSymbol> variables, IEnumerable<BoundStatement> statements)
     {
         Previous = previous;
         Diagnostics = diagnostics;
@@ -21,7 +22,7 @@ internal sealed class BoundGlobalScope
     {
         get;
     }
-    public ImmutableArray<Diagnostic> Diagnostics
+    public IEnumerable<Diagnostic> Diagnostics
     {
         get;
     }
@@ -33,15 +34,15 @@ internal sealed class BoundGlobalScope
     {
         get;
     }
-    public ImmutableArray<FunctionSymbol> Functions
+    public IEnumerable<FunctionSymbol> Functions
     {
         get;
     }
-    public ImmutableArray<VariableSymbol> Variables
+    public IEnumerable<VariableSymbol> Variables
     {
         get;
     }
-    public ImmutableArray<BoundStatement> Statements
+    public IEnumerable<BoundStatement> Statements
     {
         get;
     }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace SparkCore.Analytics.Syntax.Tree.Statements;
 
 public sealed partial class BlockStatementSyntax : StatementSyntax
 {
-    public BlockStatementSyntax(SyntaxTree syntaxTree, SyntaxToken openBraceToken, ImmutableArray<StatementSyntax> statements, SyntaxToken closeBraceToken) : base(syntaxTree)
+    public BlockStatementSyntax(SyntaxTree syntaxTree, SyntaxToken openBraceToken, IEnumerable<StatementSyntax> statements, SyntaxToken closeBraceToken) : base(syntaxTree)
     {
         OpenBraceToken = openBraceToken;
         Statements = statements;
@@ -16,7 +18,7 @@ public sealed partial class BlockStatementSyntax : StatementSyntax
     {
         get;
     }
-    public ImmutableArray<StatementSyntax> Statements
+    public IEnumerable<StatementSyntax> Statements
     {
         get;
     }

@@ -1,10 +1,91 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+namespace SparkCore.Analytics.Syntax.Tree.Nodes
+{
+    partial class TypeClauseSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitTypeClauseSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitTypeClauseSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return ColonToken;
+            yield return Identifier;
+        }
+    }
+    partial class GlobalStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitGlobalStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitGlobalStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Statement;
+        }
+    }
+    partial class CompilationUnitSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitCompilationUnitSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitCompilationUnitSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return EndOfFileToken;
+        }
+    }
+    partial class ElseClauseSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitElseClauseSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitElseClauseSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return ElseKeyword;
+            yield return ElseStatement;
+        }
+    }
+    partial class ParameterSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitParameterSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitParameterSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Identifier;
+            yield return Type;
+        }
+    }
+    partial class FunctionDeclarationSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitFunctionDeclarationSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitFunctionDeclarationSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return FunctionKeyword;
+            yield return Identifier;
+            yield return OpenParenthesisToken;
+            foreach (var child in Parameters.GetWithSeparators())
+            {
+                yield return child;
+            }
+            yield return CloseParethesisToken;
+            if(Type is not null)yield return Type;
+            yield return Body;
+        }
+    }
+}
+
 namespace SparkCore.Analytics.Syntax.Tree.Expressions
 {
+    partial class NameExpressionSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitNameExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitNameExpressionSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return IdentifierToken;
+        }
+    }
     partial class AssignmentExpressionSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitAssignmentExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitAssignmentExpressionSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return IdentifierToken;
@@ -14,6 +95,8 @@ namespace SparkCore.Analytics.Syntax.Tree.Expressions
     }
     partial class BinaryExpressionSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitBinaryExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitBinaryExpressionSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return Left;
@@ -21,8 +104,20 @@ namespace SparkCore.Analytics.Syntax.Tree.Expressions
             yield return Right;
         }
     }
+    partial class UnaryExpressionSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitUnaryExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitUnaryExpressionSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return OperatorToken;
+            yield return Operand;
+        }
+    }
     partial class CallExpressionSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitCallExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitCallExpressionSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return Identifier;
@@ -36,20 +131,17 @@ namespace SparkCore.Analytics.Syntax.Tree.Expressions
     }
     partial class LiteralExpressionSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitLiteralExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitLiteralExpressionSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return LiteralToken;
         }
     }
-    partial class NameExpressionSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return IdentifierToken;
-        }
-    }
     partial class ParenthesizedExpressionSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitParenthesizedExpressionSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitParenthesizedExpressionSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return OpenParenthesisToken;
@@ -57,125 +149,25 @@ namespace SparkCore.Analytics.Syntax.Tree.Expressions
             yield return CloseParenthesisToken;
         }
     }
-    partial class UnaryExpressionSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return OperatorToken;
-            yield return Operand;
-        }
-    }
-}
-
-namespace SparkCore.Analytics.Syntax.Tree.Nodes
-{
-    partial class CompilationUnitSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            foreach (var child in Members)
-            {
-                yield return child;
-            }
-            yield return EndOfFileToken;
-        }
-    }
-    partial class ElseClauseSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return ElseKeyword;
-            yield return ElseStatement;
-        }
-    }
-    partial class FunctionDeclarationSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return FunctionKeyword;
-            yield return Identifier;
-            yield return OpenParenthesisToken;
-            foreach (var child in Parameters.GetWithSeparators())
-            {
-                yield return child;
-            }
-            yield return CloseParethesisToken;
-            yield return Type;
-            yield return Body;
-        }
-    }
-    partial class GlobalStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Statement;
-        }
-    }
-    partial class ParameterSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Identifier;
-            yield return Type;
-        }
-    }
-    partial class TypeClauseSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return ColonToken;
-            yield return Identifier;
-        }
-    }
 }
 
 namespace SparkCore.Analytics.Syntax.Tree.Statements
 {
-    partial class BlockStatementSyntax
+    partial class WhileStatementSyntax
     {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return OpenBraceToken;
-            foreach (var child in Statements)
-            {
-                yield return child;
-            }
-            yield return CloseBraceToken;
-        }
-    }
-    partial class BreakStatementSyntax
-    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitWhileStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitWhileStatementSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return Keyword;
-        }
-    }
-    partial class ContinueStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Keyword;
-        }
-    }
-    partial class DoWhileStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return DoKeyword;
-            yield return Body;
-            yield return WhileKeyword;
             yield return Condition;
-        }
-    }
-    partial class ExpressionStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Expression;
+            yield return Body;
         }
     }
     partial class ForStatementSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitForStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitForStatementSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return Keyword;
@@ -187,42 +179,88 @@ namespace SparkCore.Analytics.Syntax.Tree.Statements
             yield return Body;
         }
     }
+    partial class ExpressionStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitExpressionStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitExpressionStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Expression;
+        }
+    }
+    partial class BlockStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitBlockStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitBlockStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return OpenBraceToken;
+            yield return CloseBraceToken;
+        }
+    }
+    partial class VariableDeclarationStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitVariableDeclarationStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitVariableDeclarationStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Keyword;
+            yield return Identifier;
+            if(TypeClause is not null)yield return TypeClause;
+            yield return EqualsToken;
+            yield return Initializer;
+        }
+    }
+    partial class ReturnStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitReturnStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitReturnStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return ReturnKeyword;
+            if(Expression is not null)yield return Expression;
+        }
+    }
+    partial class ContinueStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitContinueStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitContinueStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Keyword;
+        }
+    }
     partial class IfStatementSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitIfStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitIfStatementSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return IfKeyword;
             yield return Condition;
             yield return ThenStatement;
-            yield return ElseClause;
+            if(ElseClause is not null)yield return ElseClause;
         }
     }
-    partial class ReturnStatementSyntax
+    partial class DoWhileStatementSyntax
     {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitDoWhileStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitDoWhileStatementSyntax(this);
         public override IEnumerable<SyntaxNode> GetChildren()
         {
-            yield return ReturnKeyword;
-            yield return Expression;
-        }
-    }
-    partial class VariableDeclarationStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Keyword;
-            yield return Identifier;
-            yield return TypeClause;
-            yield return EqualsToken;
-            yield return Initializer;
-        }
-    }
-    partial class WhileStatementSyntax
-    {
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            yield return Keyword;
-            yield return Condition;
+            yield return DoKeyword;
             yield return Body;
+            yield return WhileKeyword;
+            yield return Condition;
+        }
+    }
+    partial class BreakStatementSyntax
+    {
+        public override void Accept(SyntaxNodeVisitor visitor) => visitor.VisitBreakStatementSyntax(this);
+        public override T Accept<T>(SyntaxNodeVisitor<T> visitor) => visitor.VisitBreakStatementSyntax(this);
+        public override IEnumerable<SyntaxNode> GetChildren()
+        {
+            yield return Keyword;
         }
     }
 }

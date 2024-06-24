@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace SparkCore;
 public class Compilation
 {
     private BoundGlobalScope _globalScope;
-    private Compilation(bool isScript, Compilation previous, params SyntaxTree[] syntaxTrees)
+    private Compilation(bool isScript, Compilation? previous, params SyntaxTree[] syntaxTrees)
     {
         IsScript = isScript;
         Previous = previous;
@@ -27,7 +28,7 @@ public class Compilation
     {
         return new Compilation(isScript: false, null, syntaxTrees);
     }
-    public static Compilation CreateScript(Compilation previous, params SyntaxTree[] syntaxTrees)
+    public static Compilation CreateScript(Compilation? previous, params SyntaxTree[] syntaxTrees)
     {
         return new Compilation(isScript: true, previous, syntaxTrees);
     }
@@ -36,17 +37,17 @@ public class Compilation
     {
         get;
     }
-    public Compilation Previous
+    public Compilation? Previous
     {
         get;
     }
-    public ImmutableArray<SyntaxTree> SyntaxTrees
+    public IEnumerable<SyntaxTree> SyntaxTrees
     {
         get;
     }
-    public FunctionSymbol MainFunction => GlobalScope.MainFunction;
-    public ImmutableArray<FunctionSymbol> Functions => GlobalScope.Functions;
-    public ImmutableArray<VariableSymbol> Variables => GlobalScope.Variables;
+    public FunctionSymbol? MainFunction => GlobalScope.MainFunction;
+    public IEnumerable<FunctionSymbol> Functions => GlobalScope.Functions;
+    public IEnumerable<VariableSymbol> Variables => GlobalScope.Variables;
 
     internal BoundGlobalScope GlobalScope
     {
@@ -137,7 +138,7 @@ public class Compilation
 
         var evaluator = new Evaluator(program, variables);
         var value = evaluator.Evaluate();
-        return new EvaluationResult(ImmutableArray<Diagnostic>.Empty, value);
+        return new EvaluationResult(Array.Empty<Diagnostic>(), value);
     }
     /// <summary>
     /// Run an empty evaluation that just run the analyzers.
@@ -185,11 +186,11 @@ public class Compilation
 
         body.WriteTo(writer);
     }
-    public ImmutableArray<Diagnostic> Emit(string moduleName, string[] references, string outputPath)
+    public IEnumerable<Diagnostic> Emit(string moduleName, string[] references, string outputPath)
     {
         var parseDiagnostics = SyntaxTrees.SelectMany(st => st.Diagnostics);
 
-        var diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray();
+        var diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics);
         if (diagnostics.Any())
         {
             return diagnostics;

@@ -1,14 +1,16 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using SparkCore.Analytics.Symbols;
 
 namespace SparkCore.Analytics.Binding.Tree.Expressions;
 
 internal sealed class BoundCallExpression : BoundExpression
 {
-    public BoundCallExpression(FunctionSymbol function, ImmutableArray<BoundExpression> arguments)
+    public BoundCallExpression(FunctionSymbol function, IEnumerable<BoundExpression> arguments)
     {
         Function = function;
-        Arguments = arguments;
+        Arguments = arguments.ToArray();
     }
 
     public override TypeSymbol Type => Function.Type;
@@ -17,7 +19,7 @@ internal sealed class BoundCallExpression : BoundExpression
     {
         get;
     }
-    public ImmutableArray<BoundExpression> Arguments
+    public BoundExpression[] Arguments
     {
         get;
     }

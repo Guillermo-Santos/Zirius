@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using SparkCore.Analytics.Binding.Tree.Statements;
 using SparkCore.Analytics.Symbols;
 using SparkCore.IO.Diagnostics;
@@ -7,7 +8,7 @@ namespace SparkCore.Analytics.Binding.Tree;
 
 internal sealed class BoundProgram
 {
-    public BoundProgram(BoundProgram? previous, ImmutableArray<Diagnostic> diagnostics, FunctionSymbol? mainFunction, FunctionSymbol? scriptFunction, ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functions)
+    public BoundProgram(BoundProgram? previous, IEnumerable<Diagnostic> diagnostics, FunctionSymbol? mainFunction, FunctionSymbol? scriptFunction, ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functions)
     {
         Previous = previous;
         Diagnostics = diagnostics;
@@ -20,7 +21,7 @@ internal sealed class BoundProgram
     {
         get;
     }
-    public ImmutableArray<Diagnostic> Diagnostics
+    public IEnumerable<Diagnostic> Diagnostics
     {
         get;
     }

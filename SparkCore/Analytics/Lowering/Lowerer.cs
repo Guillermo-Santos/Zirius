@@ -49,7 +49,7 @@ internal sealed class Lowerer : BoundTreeRewriter
     /// <returns></returns>
     private static BoundBlockStatement Flatten(FunctionSymbol function, BoundStatement statement)
     {
-        var builder = ImmutableArray.CreateBuilder<BoundStatement>();
+        var builder = new List<BoundStatement>();
         var stack = new Stack<BoundStatement>();
         stack.Push(statement);
 
@@ -75,7 +75,7 @@ internal sealed class Lowerer : BoundTreeRewriter
             }
         }
 
-        return new BoundBlockStatement(builder.ToImmutable());
+        return new BoundBlockStatement(builder);
     }
     private static BoundBlockStatement RemoveDeadCode(BoundBlockStatement node)
     {
@@ -85,14 +85,16 @@ internal sealed class Lowerer : BoundTreeRewriter
         var reachableStatements = new HashSet<BoundStatement>(
                 controlFlow.Blocks.SelectMany(b => b.Statements)
             );
-        var builder = node.Statements.ToBuilder();
+        var builder = node.Statements.ToList();
         for (var i = builder.Count - 1; i >= 0; i--)
         {
             if (!reachableStatements.Contains(builder[i]))
+            {
                 builder.RemoveAt(i);
+            }
         }
 
-        return new BoundBlockStatement(builder.ToImmutable());
+        return new BoundBlockStatement(builder);
     }
 
     private static bool CanFallThrough(BoundStatement boundStatement)
@@ -115,11 +117,11 @@ internal sealed class Lowerer : BoundTreeRewriter
             var endLabel = GenerateLabel();
             var gotoFalse = new BoundConditionalGotoStatement(endLabel, node.Condition, jumpIfTrue: false);
             var endLabelStatement = new BoundLabelStatement(endLabel);
-            var result = new BoundBlockStatement(ImmutableArray.Create(
+            var result = new BoundBlockStatement(new List<BoundStatement>() {
                 gotoFalse,
                 node.ThenStatement,
                 endLabelStatement
-            ));
+            });
             return RewriteStatement(result);
         }
         else
@@ -142,14 +144,14 @@ internal sealed class Lowerer : BoundTreeRewriter
             var gotoEndStatement = new BoundGotoStatement(endLabel);
             var elseLabelStatement = new BoundLabelStatement(elseLabel);
             var endLabelStatement = new BoundLabelStatement(endLabel);
-            var result = new BoundBlockStatement(ImmutableArray.Create(
+            var result = new BoundBlockStatement(new List<BoundStatement>() {
                 gotoFalse,
                 node.ThenStatement,
                 gotoEndStatement,
                 elseLabelStatement,
                 node.ElseStatement,
                 endLabelStatement
-            ));
+            });
             return RewriteStatement(result);
         }
     }
@@ -176,14 +178,14 @@ internal sealed class Lowerer : BoundTreeRewriter
         var gotoTrue = new BoundConditionalGotoStatement(node.ContinueLabel, node.Condition);
         var breakLabelStatement = new BoundLabelStatement(node.BreakLabel);
 
-        var result = new BoundBlockStatement(ImmutableArray.Create(
+        var result = new BoundBlockStatement(new List<BoundStatement>() {
                 gotoCheck,
                 continueLabelStatement,
                 node.Body,
                 checkLabelStatement,
                 gotoTrue,
                 breakLabelStatement
-            ));
+        });
 
         return RewriteStatement(result);
     }
@@ -206,12 +208,12 @@ internal sealed class Lowerer : BoundTreeRewriter
         var gotoTrue = new BoundConditionalGotoStatement(node.ContinueLabel, node.Condition);
         var breakLabelStatement = new BoundLabelStatement(node.BreakLabel);
 
-        var result = new BoundBlockStatement(ImmutableArray.Create(
+        var result = new BoundBlockStatement(new List<BoundStatement>() {
                 continueLabelStatement,
                 node.Body,
                 gotoTrue,
                 breakLabelStatement
-            ));
+        });
         return RewriteStatement(result);
     }
     protected override BoundStatement RewriteForStatement(BoundForStatement node)
@@ -252,17 +254,17 @@ internal sealed class Lowerer : BoundTreeRewriter
             )
         ); ;
 
-        var whileBody = new BoundBlockStatement(ImmutableArray.Create(
+        var whileBody = new BoundBlockStatement(new List<BoundStatement>() {
             node.Body,
             continueLabelStatemnt,
             increment
-        ));
+        });
         var whileStatement = new BoundWhileStatement(condition, whileBody, node.BreakLabel, GenerateLabel());
-        var result = new BoundBlockStatement(ImmutableArray.Create<BoundStatement>(
+        var result = new BoundBlockStatement(new List<BoundStatement>() {
             variableDeclaration,
             upperBoundDeclaration,
             whileStatement
-        ));
+        });
 
         return RewriteStatement(result);
     }
@@ -340,7 +342,7 @@ internal sealed class Lowerer : BoundTreeRewriter
     //}
     //private bool NeedRewriteExpression(BoundExpression expressionToEvaluate, out BoundBlockStatement result)
     //{
-    //    var statements = ImmutableArray.CreateBuilder<BoundStatement>();
+    //    var statements = IEnumerable.CreateBuilder<BoundStatement>();
     //    BoundExpression GetNewChild(BoundExpression old)
     //    {
     //        // If is a variable expression or a literal expression,
@@ -454,7 +456,7 @@ internal sealed class Lowerer : BoundTreeRewriter
     //                // a = call(T1)
     //                //
 
-    //                var args = ImmutableArray.CreateBuilder<BoundExpression>();
+    //                var args = IEnumerable.CreateBuilder<BoundExpression>();
     //                foreach (var arg in call.Arguments)
     //                {
     //                    args.Add(GetNewChild(arg));

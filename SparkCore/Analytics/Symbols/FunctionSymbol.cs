@@ -1,10 +1,11 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using SparkCore.Analytics.Syntax.Tree.Nodes;
 
 namespace SparkCore.Analytics.Symbols;
 public sealed class FunctionSymbol : Symbol
 {
-    public FunctionSymbol(string name, ImmutableArray<ParameterSymbol> parameters, TypeSymbol type, FunctionDeclarationSyntax? declaration = null) : base(name)
+    public FunctionSymbol(string name, ParameterSymbol[] parameters, TypeSymbol type, FunctionDeclarationSyntax? declaration = null) : base(name)
     {
         Parameters = parameters;
         Type = type;
@@ -16,7 +17,7 @@ public sealed class FunctionSymbol : Symbol
     {
         get;
     }
-    public ImmutableArray<ParameterSymbol> Parameters
+    public ParameterSymbol[] Parameters
     {
         get;
     }
